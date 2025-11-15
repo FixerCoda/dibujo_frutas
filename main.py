@@ -25,11 +25,11 @@ main_html = """
 
 
       numero = getRndInteger(0, 10);
-      letra = ["U", "N", "I"];
-      random = Math.floor(Math.random() * letra.length);
-      aleatorio = letra[random];
+      frutas = ["manzana", "platano", "naranja", "sandia", "pina", "uva"];
+      random = Math.floor(Math.random() * frutas.length);
+      aleatorio = frutas[random];
 
-      document.getElementById('mensaje').innerHTML  = 'Dibujando un ' + aleatorio;
+      document.getElementById('mensaje').innerHTML  = 'Dibujando una fruta: ' + aleatorio;
       document.getElementById('numero').value = aleatorio;
 
       $('#myCanvas').mousedown(function (e) {
@@ -54,7 +54,8 @@ main_html = """
   function Draw(x, y, isDown) {
       if (isDown) {
           ctx.beginPath();
-          ctx.strokeStyle = 'black';
+          var color = document.getElementById('colorPicker').value;
+          ctx.strokeStyle = color;
           ctx.lineWidth = 11;
           ctx.lineJoin = "round";
           ctx.moveTo(lastX, lastY);
@@ -89,6 +90,10 @@ main_html = """
     <div align="center">
         <h1 id="mensaje">Dibujando...</h1>
         <canvas id="myCanvas" width="200" height="200" style="border:2px solid black"></canvas>
+        <br/>
+        <br/>
+        <label for="colorPicker">Color: </label>
+        <input type="color" id="colorPicker" value="#000000">
         <br/>
         <br/>
         <button onclick="javascript:clearArea();return false;">Borrar</button>
@@ -130,19 +135,20 @@ def upload():
 @app.route('/prepare', methods=['GET'])
 def prepare_dataset():
     images = []
-    d = ["I","N","U"]
-    digits = []
-    for digit in d:
-      filelist = glob.glob('{}/*.png'.format(digit))
-      images_read = io.concatenate_images(io.imread_collection(filelist))
-      images_read = images_read[:, :, :, 3]
-      digits_read = np.array([digit] * images_read.shape[0])
-      images.append(images_read)
-      digits.append(digits_read)
+    fruits = ['manzana', 'platano', 'naranja', 'sandia', 'pina', 'uva']
+    labels = []
+    for fruit in fruits:
+      filelist = glob.glob('{}/*.png'.format(fruit))
+      if len(filelist) > 0:
+        images_read = io.concatenate_images(io.imread_collection(filelist))
+        images_read = images_read[:, :, :, 3]
+        labels_read = np.array([fruit] * images_read.shape[0])
+        images.append(images_read)
+        labels.append(labels_read)
     images = np.vstack(images)
-    digits = np.concatenate(digits)
+    labels = np.concatenate(labels)
     np.save('X.npy', images)
-    np.save('y.npy', digits)
+    np.save('y.npy', labels)
     return "OK!"
 
 @app.route('/X.npy', methods=['GET'])
@@ -153,8 +159,8 @@ def download_y():
     return send_file('./y.npy')
 
 if __name__ == "__main__":
-    digits = ['U', 'N', 'I']
-    for d in digits:
-        if not os.path.exists(str(d)):
-            os.mkdir(str(d))
+    fruits = ['manzana', 'platano', 'naranja', 'sandia', 'pina', 'uva']
+    for fruit in fruits:
+        if not os.path.exists(str(fruit)):
+            os.mkdir(str(fruit))
     app.run()
