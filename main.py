@@ -166,30 +166,62 @@ def upload():
     return redirect("/", code=302)
 
 
+@app.route('/status', methods=['GET'])
+def status():
+    fruits = ['manzana', 'platano', 'naranja', 'sandia', 'pina', 'uva']
+    status_info = "<h2>System Status</h2>"
+    total_images = 0
+
+    for fruit in fruits:
+        if os.path.exists(fruit):
+            count = len(glob.glob('{}/*.png'.format(fruit)))
+            total_images += count
+            status_info += "<p>{}: {} images</p>".format(fruit, count)
+        else:
+            status_info += "<p>{}: directory not found</p>".format(fruit)
+
+    status_info += "<p><strong>Total: {} images</strong></p>".format(total_images)
+    status_info += "<p>X.npy exists: {}</p>".format(os.path.exists('X.npy'))
+    status_info += "<p>y.npy exists: {}</p>".format(os.path.exists('y.npy'))
+
+    return status_info
+
 @app.route('/prepare', methods=['GET'])
 def prepare_dataset():
-    images = []
-    fruits = ['manzana', 'platano', 'naranja', 'sandia', 'pina', 'uva']
-    labels = []
-    for fruit in fruits:
-      filelist = glob.glob('{}/*.png'.format(fruit))
-      if len(filelist) > 0:
-        images_read = io.concatenate_images(io.imread_collection(filelist))
-        images_read = images_read[:, :, :, 3]
-        labels_read = np.array([fruit] * images_read.shape[0])
-        images.append(images_read)
-        labels.append(labels_read)
-    images = np.vstack(images)
-    labels = np.concatenate(labels)
-    np.save('X.npy', images)
-    np.save('y.npy', labels)
-    return "OK!"
+    try:
+        images = []
+        fruits = ['manzana', 'platano', 'naranja', 'sandia', 'pina', 'uva']
+        labels = []
+        for fruit in fruits:
+          filelist = glob.glob('{}/*.png'.format(fruit))
+          if len(filelist) > 0:
+            images_read = io.concatenate_images(io.imread_collection(filelist))
+            images_read = images_read[:, :, :, 3]
+            labels_read = np.array([fruit] * images_read.shape[0])
+            images.append(images_read)
+            labels.append(labels_read)
+
+        if len(images) == 0:
+            return "Error: No images found. Please upload some drawings first.", 400
+
+        images = np.vstack(images)
+        labels = np.concatenate(labels)
+        np.save('X.npy', images)
+        np.save('y.npy', labels)
+        return "OK! Dataset prepared with {} images.".format(len(labels))
+    except Exception as e:
+        return "Error preparing dataset: {}".format(str(e)), 500
 
 @app.route('/X.npy', methods=['GET'])
 def download_X():
+    if not os.path.exists('X.npy'):
+        return "Error: X.npy not found. Please run /prepare first to generate the dataset.", 404
     return send_file('./X.npy')
+
 @app.route('/y.npy', methods=['GET'])
 def download_y():
+    if not os.path.exists('y.npy'):
+        return "Error: y.npy not found. Please run /prepare first to generate the dataset.", 404
     return send_file('./y.npy')
 
 if __name__ == "__main__":
