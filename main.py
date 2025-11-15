@@ -10,14 +10,41 @@ app = Flask(__name__)
 
 main_html = """
 <html>
-<head></head>
+<head>
+<style>
+  .color-btn {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    border: 2px solid #333;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .color-btn.selected {
+    border: 3px solid #000;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  }
+</style>
+</head>
 <script>
   var mousePressed = false;
   var lastX, lastY;
   var ctx;
+  var currentColor = '#FF0000'; // Default red
 
    function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min) ) + min;
+   }
+
+   function selectColor(color, element) {
+    currentColor = color;
+    // Remove selected class from all buttons
+    var buttons = document.getElementsByClassName('color-btn');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.remove('selected');
+    }
+    // Add selected class to clicked button
+    element.classList.add('selected');
    }
 
   function InitThis() {
@@ -26,10 +53,11 @@ main_html = """
 
       numero = getRndInteger(0, 10);
       frutas = ["manzana", "platano", "naranja", "sandia", "pina", "uva"];
+      etiquetas = ["Manzana", "Plátano", "Naranja", "Sandía", "Piña", "Uva"]
       random = Math.floor(Math.random() * frutas.length);
       aleatorio = frutas[random];
 
-      document.getElementById('mensaje').innerHTML  = 'Dibujando una fruta: ' + aleatorio;
+      document.getElementById('mensaje').innerHTML  = 'Dibujando una fruta: ' + etiquetas[random];
       document.getElementById('numero').value = aleatorio;
 
       $('#myCanvas').mousedown(function (e) {
@@ -54,8 +82,7 @@ main_html = """
   function Draw(x, y, isDown) {
       if (isDown) {
           ctx.beginPath();
-          var color = document.getElementById('colorPicker').value;
-          ctx.strokeStyle = color;
+          ctx.strokeStyle = currentColor;
           ctx.lineWidth = 11;
           ctx.lineJoin = "round";
           ctx.moveTo(lastX, lastY);
@@ -92,9 +119,16 @@ main_html = """
         <canvas id="myCanvas" width="200" height="200" style="border:2px solid black"></canvas>
         <br/>
         <br/>
-        <label for="colorPicker">Color: </label>
-        <input type="color" id="colorPicker" value="#000000">
-        <br/>
+        <div style="margin: 10px;">
+          <strong>Colores:</strong><br/>
+          <div class="color-btn selected" style="background-color: #FF0000;" onclick="selectColor('#FF0000', this)" title="Rojo"></div>
+          <div class="color-btn" style="background-color: #FFFF00;" onclick="selectColor('#FFFF00', this)" title="Amarillo"></div>
+          <div class="color-btn" style="background-color: #FFA500;" onclick="selectColor('#FFA500', this)" title="Naranja"></div>
+          <div class="color-btn" style="background-color: #00FF00;" onclick="selectColor('#00FF00', this)" title="Verde"></div>
+          <div class="color-btn" style="background-color: #8B4513;" onclick="selectColor('#8B4513', this)" title="Marrón"></div>
+          <div class="color-btn" style="background-color: #800080;" onclick="selectColor('#800080', this)" title="Morado"></div>
+          <div class="color-btn" style="background-color: #FFC0CB;" onclick="selectColor('#FFC0CB', this)" title="Rosa"></div>
+        </div>
         <br/>
         <button onclick="javascript:clearArea();return false;">Borrar</button>
     </div>
