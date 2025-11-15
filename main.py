@@ -193,7 +193,8 @@ def prepare_dataset():
           filelist = glob.glob('{}/*.png'.format(fruit))
           if len(filelist) > 0:
             images_read = io.concatenate_images(io.imread_collection(filelist))
-            images_read = images_read[:, :, :, 3]
+            # Take RGB channels (0, 1, 2) to preserve color information
+            images_read = images_read[:, :, :, 0:3]
             labels_read = np.array([fruit] * images_read.shape[0])
             images.append(images_read)
             labels.append(labels_read)
