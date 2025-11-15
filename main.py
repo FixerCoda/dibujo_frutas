@@ -111,9 +111,6 @@ main_html = """
 <body onload="InitThis();">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript" ></script>
-    <div align="left">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Uni-logo_transparente_granate.png" width="300"/>
-    </div>
     <div align="center">
         <h1 id="mensaje">Dibujando...</h1>
         <canvas id="myCanvas" width="200" height="200" style="border:2px solid black"></canvas>
